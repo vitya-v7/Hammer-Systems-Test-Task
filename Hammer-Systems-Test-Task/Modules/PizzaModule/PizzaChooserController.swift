@@ -21,6 +21,7 @@ protocol PizzaChooserViewOutput {
     var numberOfElements: Int { get }
     func viewDidLoadDone()
     func viewWillAppearDone()
+    func countOfElements() -> Int
 }
 
 final class PizzaChooserController: UIViewController, PizzaChooserViewInput {
@@ -31,6 +32,7 @@ final class PizzaChooserController: UIViewController, PizzaChooserViewInput {
     
     var output: PizzaChooserViewOutput?
     static let reuseControllerIdentifier = "PizzaChooserControllerID"
+    private var scrollBySegmentButton = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -174,10 +176,44 @@ extension PizzaChooserController: CategoryHeaderViewDelegate {
         guard let output = self.output else {
             return
         }
-        self.tableView.scrollToRow(at: IndexPath(item: index * output.numberOfRowsInEachSection,
-                                                 section: 1),
-                                   at: index == 0 ? .bottom : .top, animated: true)
-        self.tableView.reloadData()
+        DispatchQueue.main.async {
+            self.scrollBySegmentButton = true
+            self.tableView.scrollToRow(at: IndexPath(item: index * output.numberOfRowsInEachSection,
+                                                     section: 1),
+                                       at: index == 0 ? .bottom : .top, animated: false)
+            self.reloadTableView()
+        }
+    }
+}
+
+extension PizzaChooserController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let output = self.output,
+              self.scrollBySegmentButton == false,
+              let headerView = self.tableView.headerView(forSection: 1) as? CategoryHeader,
+              let minVisibleIndexPath = self.tableView.indexPathsForVisibleRows?.min() else {
+                  self.scrollBySegmentButton = false
+                  return
+              }
+        var minVisibleItem = (minVisibleIndexPath.item + 1) / output.numberOfRowsInEachSection
+        let height = scrollView.frame.size.height
+        let contentYOffset = scrollView.contentOffset.y
+        let distanceFromBottom = scrollView.contentSize.height - contentYOffset
+        if distanceFromBottom < height - 0.1 {
+            minVisibleItem += 1
+        }
+        if minVisibleItem != headerView.selectedItem {
+            headerView.setSelectedItemIndexPath(IndexPath(item: minVisibleItem, section: 0))
+        }
     }
     
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        self.reloadTableView()
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            self.reloadTableView()
+        }
+    }
 }
