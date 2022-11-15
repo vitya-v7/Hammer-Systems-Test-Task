@@ -18,7 +18,7 @@ final class CategoryHeader: UITableViewHeaderFooterView {
     @IBOutlet private weak var collectionView: UICollectionView!
     
     weak var delegate: CategoryHeaderViewDelegate?
-    private var selectedItem = 0
+    private(set) var selectedItem = 0
     static var reuseIdentifier = "CategoryHeaderID"
     
     override func awakeFromNib() {
@@ -64,22 +64,24 @@ extension CategoryHeader: UICollectionViewDataSource {
         cell.delegate = self
         return cell
     }
+    
+    func setSelectedItemIndexPath(_ indexPath: IndexPath) {
+        
+        self.selectedItem = indexPath.item
+        self.collectionView.scrollToItem(at: indexPath,
+                                         at: .centeredHorizontally,
+                                         animated: true)
+        self.collectionView.reloadData()
+    }
+    
 }
 
 extension CategoryHeader: CategoryHeaderSegmentViewDelegate {
     func categoryHeaderSegmentViewDidTapOnButton(_ segmentView: CategoryHeaderSegmentView) {
-        let oldselectedIndexPath = IndexPath(item: self.selectedItem,
-                                             section: 0)
-        guard let selectedIndexPath = segmentView.indexPath,
-              selectedIndexPath != oldselectedIndexPath else {
-                  return
-              }
-        
-        self.selectedItem = selectedIndexPath.item
-        self.collectionView.scrollToItem(at: selectedIndexPath,
-                                         at: .centeredHorizontally,
-                                         animated: true)
-        self.collectionView.reloadData()
+        guard let selectedIndexPath = segmentView.indexPath else {
+            return
+        }
+        self.setSelectedItemIndexPath(selectedIndexPath)
         self.delegate?.categoryHeaderView(self,
                                           didTapOnButtonWithIndex: self.selectedItem)
     }

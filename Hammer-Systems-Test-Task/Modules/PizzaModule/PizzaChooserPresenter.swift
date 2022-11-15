@@ -80,7 +80,7 @@ final class PizzaChooserPresenter: PizzaChooserViewOutput, BannerCellDataSource 
             })
         }
         
-        self.reachability?.whenUnreachable = { [weak self] reachability in
+        self.reachability?.whenUnreachable = { reachability in
             guard reachability.connection == .unavailable else {
                 return
             }
@@ -88,4 +88,10 @@ final class PizzaChooserPresenter: PizzaChooserViewOutput, BannerCellDataSource 
         }
     }
     
+    func countOfElements() -> Int {
+        guard let viewModels = viewModels else {
+            return 0
+        }
+        return viewModels.count
+    }
 }

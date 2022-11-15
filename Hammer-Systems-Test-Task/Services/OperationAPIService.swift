@@ -29,12 +29,11 @@ final class OperationImageAPIService {
                                               _ imagePath: String) -> Void) {
         var operation: Operation?
         if pendingOperations.downloadsInProgress[indexPath] != nil {
-            if let operation = pendingOperations.downloadsInProgress[indexPath],
+            operation = pendingOperations.downloadsInProgress[indexPath]
+            if let operation = operation as? ImageDownloadOperation,
                !operation.isCancelled && operation.isFinished {
-                if let operation = operation as? ImageDownloadOperation {
-                    successCallback(operation.image, imagePath)
-                    return
-                }
+                successCallback(operation.image, imagePath)
+                return
             }
         } else {
             let downloadOperation = ImageDownloadOperation(imagePath)

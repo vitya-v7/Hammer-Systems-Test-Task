@@ -42,7 +42,7 @@ final class PizzaCell: UITableViewCell {
         self.pizzaTitle.text = viewModel.pizzaTitle
         self.pizzaDescription.text = viewModel.pizzaDescription
         self.pizzaBuyButton.setTitle(viewModel.pizzaBuyButtonText,
-                                for: .normal)
+                                     for: .normal)
         self.viewModel = viewModel
         guard let stringURL = viewModel.pizzaImgURL else { return }
         let urlImage = URL.init(string: stringURL)
@@ -50,8 +50,8 @@ final class PizzaCell: UITableViewCell {
         
         guard let reachability = try? Reachability(),
               reachability.connection != .unavailable else {
-                  return
-              }
+            return
+        }
         OperationImageAPIService.shared.startDownload(imagePath: viewModel.pizzaImgURL,
                                                       indexPath: indexPath,
                                                       successCallback: { [weak self] (image: UIImage?, imagePath: String) in
