@@ -212,8 +212,6 @@ extension PizzaChooserController: UIScrollViewDelegate {
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate {
-            self.reloadTableView()
-        }
+        self.reloadTableView()
     }
 }
